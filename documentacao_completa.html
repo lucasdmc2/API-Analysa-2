@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API de Extração e Normalização de Exames Clínicos - Documentação</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2c5282;
+            border-bottom: 3px solid #3182ce;
+            padding-bottom: 10px;
+        }
+        h2 {
+            color: #2a69ac;
+            margin-top: 30px;
+        }
+        h3 {
+            color: #4a5568;
+        }
+        .status {
+            background: #68d391;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            margin: 20px 0;
+            font-weight: bold;
+        }
+        .endpoint {
+            background: #f7fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 15px 0;
+        }
+        .method {
+            background: #3182ce;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        .method.post { background: #38a169; }
+        .method.get { background: #3182ce; }
+        .url {
+            font-family: 'Courier New', monospace;
+            background: #edf2f7;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        .code {
+            background: #1a202c;
+            color: #e2e8f0;
+            padding: 15px;
+            border-radius: 6px;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+            margin: 10px 0;
+        }
+        .token {
+            background: #fed7d7;
+            color: #822727;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-family: monospace;
+            margin: 2px;
+            display: inline-block;
+        }
+        .warning {
+            background: #feebc8;
+            border-left: 4px solid #ed8936;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        .success {
+            background: #c6f6d5;
+            border-left: 4px solid #38a169;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+        th, td {
+            border: 1px solid #e2e8f0;
+            padding: 12px;
+            text-align: left;
+        }
+        th {
+            background: #edf2f7;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🩺 API de Extração e Normalização de Exames Clínicos</h1>
+        
+        <div class="status">
+            ✅ API ATIVA - Rodando em http://localhost:8000
+        </div>
+
+        <h2>📋 Visão Geral</h2>
+        <p>API determinística para ingestão de laudos de exames (PDF/imagem), extração OCR, normalização LOINC/UCUM, cálculo de flags e geração de recomendações informativas para o contexto brasileiro.</p>
+
+        <h3>🎯 Características Principais</h3>
+        <ul>
+            <li><strong>Determinismo</strong>: Mesmo input → mesmo output (cache por hash)</li>
+            <li><strong>Auditabilidade</strong>: Trilha completa de processamento</li>
+            <li><strong>Interoperabilidade</strong>: LOINC, UCUM, SNOMED CT</li>
+            <li><strong>Conformidade LGPD</strong>: Dados em território brasileiro</li>
+        </ul>
+
+        <h2>🔐 Autenticação</h2>
+        <p>A API usa tokens Bearer para autenticação. Use um dos tokens de desenvolvimento:</p>
+        
+        <table>
+            <tr>
+                <th>Token</th>
+                <th>Escopo</th>
+                <th>Descrição</th>
+            </tr>
+            <tr>
+                <td><span class="token">dev-admin</span></td>
+                <td>read, write, admin</td>
+                <td>Acesso administrativo completo</td>
+            </tr>
+            <tr>
+                <td><span class="token">dev-user</span></td>
+                <td>read, write</td>
+                <td>Usuário regular</td>
+            </tr>
+            <tr>
+                <td><span class="token">dev-read</span></td>
+                <td>read</td>
+                <td>Somente leitura</td>
+            </tr>
+        </table>
+
+        <h2>🔗 Endpoints Principais</h2>
+
+        <div class="endpoint">
+            <h3><span class="method get">GET</span> Health Check</h3>
+            <div class="url">GET http://localhost:8000/health</div>
+            <p><strong>Descrição:</strong> Verificação de saúde da API</p>
+            <p><strong>Autenticação:</strong> Não requerida</p>
+            <h4>Exemplo de uso:</h4>
+            <div class="code">curl http://localhost:8000/health</div>
+            <h4>Resposta de exemplo:</h4>
+            <div class="code">{
+  "status": "healthy",
+  "timestamp": "2025-08-27T19:30:28.892207",
+  "version": "1.0.0-demo",
+  "dependencies": {
+    "database": "mock",
+    "storage": "mock",
+    "ocr_service": "mock"
+  }
+}</div>
+        </div>
+
+        <div class="endpoint">
+            <h3><span class="method post">POST</span> Criar Ingestão</h3>
+            <div class="url">POST http://localhost:8000/v1/ingestions</div>
+            <p><strong>Descrição:</strong> Criar nova ingestão de documento médico</p>
+            <p><strong>Autenticação:</strong> Bearer token com escopo 'write'</p>
+            <h4>Exemplo de uso:</h4>
+            <div class="code">curl -X POST "http://localhost:8000/v1/ingestions" \
+  -H "Authorization: Bearer dev-user" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "document_type": "laboratory_report",
+    "filename": "laudo_hemograma.pdf",
+    "patient_id": "123e4567-e89b-12d3-a456-426614174000"
+  }'</div>
+            <h4>Resposta de exemplo:</h4>
+            <div class="code">{
+  "ingestion_id": "da2e9236-0044-4ee8-b9a3-969b6b570291",
+  "status": "processing",
+  "created_at": "2025-08-27T19:30:00.000000",
+  "upload_url": null
+}</div>
+        </div>
+
+        <div class="endpoint">
+            <h3><span class="method get">GET</span> Status da Ingestão</h3>
+            <div class="url">GET http://localhost:8000/v1/ingestions/{ingestion_id}</div>
+            <p><strong>Descrição:</strong> Consultar status e progresso da ingestão</p>
+            <p><strong>Autenticação:</strong> Bearer token com escopo 'read'</p>
+            <h4>Exemplo de uso:</h4>
+            <div class="code">curl -H "Authorization: Bearer dev-user" \
+  "http://localhost:8000/v1/ingestions/da2e9236-0044-4ee8-b9a3-969b6b570291"</div>
+        </div>
+
+        <div class="endpoint">
+            <h3><span class="method get">GET</span> Observações do Paciente</h3>
+            <div class="url">GET http://localhost:8000/v1/patients/{patient_id}/observations</div>
+            <p><strong>Descrição:</strong> Listar observações laboratoriais do paciente</p>
+            <p><strong>Autenticação:</strong> Bearer token com escopo 'read'</p>
+            <h4>Exemplo de uso:</h4>
+            <div class="code">curl -H "Authorization: Bearer dev-user" \
+  "http://localhost:8000/v1/patients/123e4567-e89b-12d3-a456-426614174000/observations"</div>
+            <h4>Resposta de exemplo:</h4>
+            <div class="code">{
+  "data": [
+    {
+      "observation_id": "469f02b7-ec8e-4362-b3d8-ad340db8ed1a",
+      "loinc_code": "718-7",
+      "display": "Hemoglobina",
+      "value_numeric": 13.2,
+      "unit_ucum": "g/dL",
+      "flag": "N",
+      "collected_at": "2025-08-27T19:30:00.000000"
+    },
+    {
+      "observation_id": "547f22e9-a6de-4330-9c82-d6dea6c063a6",
+      "loinc_code": "2345-7",
+      "display": "Glicose",
+      "value_numeric": 105.0,
+      "unit_ucum": "mg/dL",
+      "flag": "H",
+      "collected_at": "2025-08-27T19:30:00.000000"
+    }
+  ],
+  "pagination": {
+    "has_next": false,
+    "limit": 20
+  }
+}</div>
+        </div>
+
+        <div class="endpoint">
+            <h3><span class="method post">POST</span> Criar Faixa de Referência</h3>
+            <div class="url">POST http://localhost:8000/v1/admin/rangesets</div>
+            <p><strong>Descrição:</strong> Configurar nova faixa de referência (Admin apenas)</p>
+            <p><strong>Autenticação:</strong> Bearer token com escopo 'admin'</p>
+            <h4>Exemplo de uso:</h4>
+            <div class="code">curl -X POST "http://localhost:8000/v1/admin/rangesets" \
+  -H "Authorization: Bearer dev-admin" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "analyte_key": "glucose_fasting",
+    "unit_ucum": "mg/dL",
+    "ref_low": 70,
+    "ref_high": 99,
+    "confidence_level": "high"
+  }'</div>
+        </div>
+
+        <h2>🧪 Dados Demo Disponíveis</h2>
+        
+        <div class="success">
+            <h3>Paciente de Teste</h3>
+            <p><strong>ID:</strong> 123e4567-e89b-12d3-a456-426614174000</p>
+            <p><strong>Perfil:</strong> Mulher, 45 anos</p>
+            
+            <h4>Observações Clínicas:</h4>
+            <ul>
+                <li><strong>Hemoglobina:</strong> 13.2 g/dL (Normal, LOINC: 718-7)</li>
+                <li><strong>Glicose:</strong> 105 mg/dL (Alto, LOINC: 2345-7)</li>
+            </ul>
+            
+            <h4>Recomendação:</h4>
+            <p>Glicose levemente elevada → "Discutir com médico sobre repetição do exame"</p>
+        </div>
+
+        <h2>⚠️ Códigos de Erro</h2>
+        
+        <table>
+            <tr>
+                <th>Código</th>
+                <th>Erro</th>
+                <th>Descrição</th>
+            </tr>
+            <tr>
+                <td>401</td>
+                <td>Unauthorized</td>
+                <td>Token de acesso ausente ou inválido</td>
+            </tr>
+            <tr>
+                <td>403</td>
+                <td>Forbidden</td>
+                <td>Token válido mas sem escopo necessário</td>
+            </tr>
+            <tr>
+                <td>404</td>
+                <td>Not Found</td>
+                <td>Recurso não encontrado</td>
+            </tr>
+            <tr>
+                <td>422</td>
+                <td>Validation Error</td>
+                <td>Dados de entrada inválidos</td>
+            </tr>
+        </table>
+
+        <h2>🔧 Teste Rápido</h2>
+        
+        <div class="warning">
+            <h3>Como testar a API:</h3>
+            <ol>
+                <li>Teste o health check: <code>curl http://localhost:8000/health</code></li>
+                <li>Crie uma ingestão com o token dev-user</li>
+                <li>Consulte as observações do paciente demo</li>
+                <li>Configure faixas de referência com o token dev-admin</li>
+            </ol>
+        </div>
+
+        <h2>📊 Status dos Serviços</h2>
+        <ul>
+            <li>✅ <strong>API Server:</strong> http://localhost:8000 (Ativo)</li>
+            <li>✅ <strong>Health Check:</strong> http://localhost:8000/health (Healthy)</li>
+            <li>✅ <strong>OpenAPI Schema:</strong> http://localhost:8000/openapi.json (Disponível)</li>
+            <li>✅ <strong>Autenticação OAuth2:</strong> Bearer Token (Funcionando)</li>
+            <li>✅ <strong>Controle de Escopo:</strong> admin/write/read (Funcionando)</li>
+        </ul>
+
+        <h2>🌐 Acesso à Documentação Swagger</h2>
+        
+        <div class="warning">
+            <p><strong>Nota:</strong> Se você está acessando de um ambiente externo, a URL <code>http://localhost:8000/docs</code> pode não estar acessível.</p>
+            <p>Para acessar a documentação interativa Swagger UI:</p>
+            <ol>
+                <li>Certifique-se de estar no mesmo ambiente onde a API está rodando</li>
+                <li>Acesse: <a href="http://localhost:8000/docs" target="_blank">http://localhost:8000/docs</a></li>
+                <li>Ou use esta documentação simplificada para testar via curl</li>
+            </ol>
+        </div>
+
+        <p><em>Desenvolvido para demonstração da API de Extração e Normalização de Exames Clínicos</em></p>
+    </div>
+</body>
+</html>
