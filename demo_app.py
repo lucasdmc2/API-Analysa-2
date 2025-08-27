@@ -5,7 +5,7 @@ Simplified version that works without database dependencies
 
 from fastapi import FastAPI, HTTPException, Depends, status
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, HTMLResponse
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from pydantic import BaseModel, Field
 from typing import Optional, List, Dict, Any
@@ -188,6 +188,24 @@ async def health_check():
             "ocr_service": "mock"
         }
     )
+
+# Documentation endpoint
+@app.get("/api-docs", response_class=HTMLResponse)
+async def api_documentation():
+    """Documentação simplificada da API"""
+    try:
+        with open("api_documentation.html", "r", encoding="utf-8") as f:
+            return HTMLResponse(content=f.read())
+    except FileNotFoundError:
+        return HTMLResponse(content="""
+        <html>
+            <body>
+                <h1>API de Extração e Normalização de Exames Clínicos</h1>
+                <p>Documentação não encontrada. Use <a href="/docs">/docs</a> para Swagger UI.</p>
+                <p>Teste: <a href="/health">/health</a></p>
+            </body>
+        </html>
+        """)
 
 # Ingestion endpoints
 @app.post("/v1/ingestions", response_model=IngestionResponse, status_code=201)
