@@ -460,6 +460,36 @@ async def web_client():
             status_code=404
         )
 
+@app.get("/client-offline", response_class=HTMLResponse)
+async def web_client_offline():
+    """Serve the offline web client interface"""
+    try:
+        with open("/workspace/cliente_web_offline.html", "r", encoding="utf-8") as f:
+            return HTMLResponse(content=f.read())
+    except FileNotFoundError:
+        return HTMLResponse(
+            content="""
+            <html><body>
+            <h1>Cliente Web Offline não encontrado</h1>
+            <p>O arquivo cliente_web_offline.html não foi encontrado.</p>
+            <p><a href="/client">Acesse o cliente web normal</a></p>
+            </body></html>
+            """,
+            status_code=404
+        )
+
+@app.get("/download-client")
+async def download_client():
+    """Download the offline client for local use"""
+    try:
+        return FileResponse(
+            path="/workspace/cliente_web_offline.html",
+            filename="cliente_web_offline.html",
+            media_type="text/html"
+        )
+    except FileNotFoundError:
+        raise HTTPException(status_code=404, detail="Arquivo não encontrado")
+
 @app.get("/")
 async def root():
     """Root endpoint with links to all interfaces"""
@@ -487,6 +517,16 @@ async def root():
                 <a href="/client" class="link-card">
                     <h3>🌐 Cliente Web Interativo</h3>
                     <p>Interface gráfica completa para testar todos os endpoints da API</p>
+                </a>
+                
+                <a href="/client-offline" class="link-card">
+                    <h3>💾 Cliente Web Offline</h3>
+                    <p>Versão que funciona mesmo sem conexão (com dados demo)</p>
+                </a>
+                
+                <a href="/download-client" class="link-card">
+                    <h3>📥 Download Cliente Offline</h3>
+                    <p>Baixar arquivo HTML para usar localmente no seu computador</p>
                 </a>
                 
                 <a href="/docs" class="link-card">
