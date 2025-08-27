@@ -1,0 +1,48 @@
+🚀 SWAGGER UI - ACESSO SIMPLES
+
+✅ SWAGGER UI DISPONIBILIZADO COM SUCESSO!
+
+🌐 COMO ACESSAR:
+
+OPÇÃO 1 - Port Forwarding (Recomendado):
+1. ssh -L 8000:localhost:8000 usuario@servidor
+2. Abra: http://localhost:8000/docs
+
+OPÇÃO 2 - Via Página Principal:
+1. ssh -L 8000:localhost:8000 usuario@servidor  
+2. Abra: http://localhost:8000/
+3. Clique em "🚀 Swagger UI"
+
+🔐 COMO USAR:
+
+1. Clique no botão "Authorize" no Swagger UI
+2. Digite: Bearer dev-user
+3. Clique "Authorize"
+4. Teste qualquer endpoint clicando "Try it out"
+
+🧪 DADOS PARA TESTAR:
+
+Paciente ID: 123e4567-e89b-12d3-a456-426614174000
+
+Ingestão (POST /v1/ingestions):
+{
+  "document_type": "laboratory_report",
+  "filename": "teste.pdf",
+  "patient_id": "123e4567-e89b-12d3-a456-426614174000"
+}
+
+Faixa de Referência (POST /v1/admin/rangesets):
+{
+  "analyte_key": "glucose_test",
+  "unit_ucum": "mg/dL", 
+  "ref_low": 70,
+  "ref_high": 99
+}
+
+🎯 ENDPOINTS PRINCIPAIS:
+• GET /health - Status da API
+• POST /v1/ingestions - Criar ingestão
+• GET /v1/patients/{id}/observations - Ver exames
+• POST /v1/admin/rangesets - Configurar faixas
+
+🏆 RESULTADO: Interface Swagger completa funcionando!

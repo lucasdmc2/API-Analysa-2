@@ -490,6 +490,163 @@ async def download_client():
     except FileNotFoundError:
         raise HTTPException(status_code=404, detail="Arquivo não encontrado")
 
+@app.get("/swagger", response_class=HTMLResponse)
+async def swagger_redirect():
+    """Redirect to Swagger UI for easy access"""
+    return HTMLResponse(content="""
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>Redirecionando para Swagger UI...</title>
+        <meta http-equiv="refresh" content="0; url=/docs">
+        <style>
+            body { font-family: Arial, sans-serif; text-align: center; padding: 50px; background: #f5f5f5; }
+            .container { max-width: 600px; margin: 0 auto; background: white; padding: 40px; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+            h1 { color: #1976d2; }
+            .loading { margin: 20px 0; }
+            a { color: #1976d2; text-decoration: none; font-weight: bold; }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <h1>🚀 Redirecionando para Swagger UI</h1>
+            <div class="loading">Carregando documentação interativa...</div>
+            <p>Se não for redirecionado automaticamente, <a href="/docs">clique aqui</a></p>
+        </div>
+        <script>
+            setTimeout(function() {
+                window.location.href = '/docs';
+            }, 1000);
+        </script>
+    </body>
+    </html>
+    """)
+
+@app.get("/swagger-info", response_class=HTMLResponse)
+async def swagger_info():
+    """Information about how to use Swagger UI"""
+    return HTMLResponse(content="""
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>Como Usar o Swagger UI - API de Exames Clínicos</title>
+        <style>
+            body { font-family: Arial, sans-serif; margin: 50px; background: #f5f5f5; line-height: 1.6; }
+            .container { max-width: 800px; margin: 0 auto; background: white; padding: 40px; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+            h1 { color: #1976d2; text-align: center; }
+            h2 { color: #2c5282; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px; }
+            .btn { background: #1976d2; color: white; padding: 12px 24px; border: none; border-radius: 5px; text-decoration: none; display: inline-block; margin: 10px 5px; }
+            .btn:hover { background: #1565c0; }
+            .code { background: #f8f9fa; padding: 15px; border-radius: 5px; border-left: 4px solid #1976d2; font-family: monospace; }
+            .feature { background: #e3f2fd; padding: 15px; border-radius: 5px; margin: 10px 0; }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <h1>🚀 Como Usar o Swagger UI</h1>
+            
+            <div style="text-align: center; margin: 30px 0;">
+                <a href="/docs" class="btn">🔗 Abrir Swagger UI</a>
+                <a href="/redoc" class="btn">📖 Abrir ReDoc</a>
+                <a href="/" class="btn">🏠 Página Principal</a>
+            </div>
+            
+            <h2>📋 O que é o Swagger UI?</h2>
+            <p>O Swagger UI é uma interface interativa que permite:</p>
+            <ul>
+                <li><strong>Visualizar</strong> todos os endpoints da API</li>
+                <li><strong>Testar</strong> requisições diretamente no navegador</li>
+                <li><strong>Ver</strong> exemplos de requests e responses</li>
+                <li><strong>Entender</strong> a estrutura de dados da API</li>
+                <li><strong>Experimentar</strong> diferentes parâmetros e payloads</li>
+            </ul>
+            
+            <h2>🔧 Como Usar</h2>
+            
+            <div class="feature">
+                <h3>1. Autenticação</h3>
+                <p>Use um dos tokens demo para autenticação:</p>
+                <div class="code">
+                    dev-admin (acesso completo)<br>
+                    dev-user (read/write)<br>
+                    dev-read (somente leitura)
+                </div>
+                <p>Clique no botão "Authorize" no Swagger UI e digite: <code>Bearer dev-user</code></p>
+            </div>
+            
+            <div class="feature">
+                <h3>2. Endpoints Disponíveis</h3>
+                <ul>
+                    <li><strong>GET /health</strong> - Status da API</li>
+                    <li><strong>POST /v1/ingestions</strong> - Criar ingestão</li>
+                    <li><strong>GET /v1/ingestions/{id}</strong> - Status da ingestão</li>
+                    <li><strong>GET /v1/patients/{id}/observations</strong> - Observações do paciente</li>
+                    <li><strong>POST /v1/admin/rangesets</strong> - Criar faixa de referência</li>
+                    <li><strong>GET /v1/admin/rangesets</strong> - Listar faixas</li>
+                </ul>
+            </div>
+            
+            <div class="feature">
+                <h3>3. Testando Endpoints</h3>
+                <p>Para testar um endpoint:</p>
+                <ol>
+                    <li>Clique no endpoint desejado</li>
+                    <li>Clique em "Try it out"</li>
+                    <li>Preencha os parâmetros necessários</li>
+                    <li>Clique em "Execute"</li>
+                    <li>Veja a resposta na seção "Response"</li>
+                </ol>
+            </div>
+            
+            <h2>📊 Dados Demo</h2>
+            <p>Use estes dados para testar:</p>
+            
+            <div class="feature">
+                <h3>Paciente ID:</h3>
+                <div class="code">123e4567-e89b-12d3-a456-426614174000</div>
+            </div>
+            
+            <div class="feature">
+                <h3>Exemplo de Ingestão:</h3>
+                <div class="code">
+{<br>
+  "document_type": "laboratory_report",<br>
+  "filename": "hemograma.pdf",<br>
+  "patient_id": "123e4567-e89b-12d3-a456-426614174000"<br>
+}
+                </div>
+            </div>
+            
+            <div class="feature">
+                <h3>Exemplo de Faixa de Referência:</h3>
+                <div class="code">
+{<br>
+  "analyte_key": "glucose_test",<br>
+  "unit_ucum": "mg/dL",<br>
+  "ref_low": 70,<br>
+  "ref_high": 99<br>
+}
+                </div>
+            </div>
+            
+            <h2>🌐 Acesso</h2>
+            <p>URLs disponíveis:</p>
+            <ul>
+                <li><strong>Swagger UI:</strong> <a href="/docs">/docs</a></li>
+                <li><strong>ReDoc:</strong> <a href="/redoc">/redoc</a></li>
+                <li><strong>OpenAPI Schema:</strong> <a href="/openapi.json">/openapi.json</a></li>
+                <li><strong>Esta Página:</strong> <a href="/swagger-info">/swagger-info</a></li>
+            </ul>
+            
+            <div style="text-align: center; margin: 30px 0; padding: 20px; background: #f0f8ff; border-radius: 5px;">
+                <h3>🚀 Pronto para começar?</h3>
+                <a href="/docs" class="btn">Usar Swagger UI Agora</a>
+            </div>
+        </div>
+    </body>
+    </html>
+    """)
+
 @app.get("/")
 async def root():
     """Root endpoint with links to all interfaces"""
@@ -500,18 +657,47 @@ async def root():
         <title>API de Exames Clínicos - DEMO</title>
         <style>
             body {{ font-family: Arial, sans-serif; margin: 50px; background: #f5f5f5; }}
-            .container {{ max-width: 800px; margin: 0 auto; background: white; padding: 40px; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }}
+            .container {{ max-width: 900px; margin: 0 auto; background: white; padding: 40px; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }}
             h1 {{ color: #2c5282; text-align: center; }}
             .links {{ display: grid; gap: 20px; margin-top: 30px; }}
             .link-card {{ background: #e2e8f0; padding: 20px; border-radius: 8px; text-decoration: none; color: #2d3748; border-left: 5px solid #3182ce; }}
             .link-card:hover {{ background: #cbd5e0; transform: translateY(-2px); transition: all 0.2s; }}
+            .link-card.swagger {{ background: #f0f8ff; border-left: 5px solid #1976d2; }}
+            .link-card.swagger:hover {{ background: #e3f2fd; }}
             .status {{ background: #c6f6d5; color: #22543d; padding: 10px; border-radius: 5px; margin: 20px 0; text-align: center; }}
+            .swagger-section {{ background: #f8fafc; padding: 25px; border-radius: 10px; margin: 25px 0; border: 2px solid #1976d2; }}
+            .swagger-section h2 {{ color: #1976d2; text-align: center; margin-bottom: 20px; }}
         </style>
     </head>
     <body>
         <div class="container">
             <h1>🩺 API de Extração e Normalização de Exames Clínicos</h1>
             <div class="status">✅ API Online - Versão Demo</div>
+            
+            <div class="swagger-section">
+                <h2>📋 Swagger UI - Documentação Interativa</h2>
+                <div class="links">
+                    <a href="/docs" class="link-card swagger">
+                        <h3>🚀 Swagger UI</h3>
+                        <p><strong>PRINCIPAL:</strong> Interface interativa para testar todos os endpoints da API</p>
+                    </a>
+                    
+                    <a href="/redoc" class="link-card swagger">
+                        <h3>📖 ReDoc</h3>
+                        <p>Documentação alternativa com visual limpo e organizado</p>
+                    </a>
+                    
+                    <a href="/openapi.json" class="link-card swagger">
+                        <h3>⚙️ OpenAPI Schema</h3>
+                        <p>Schema JSON para importar em Postman, Insomnia ou outras ferramentas</p>
+                    </a>
+                    
+                    <a href="/swagger-info" class="link-card swagger">
+                        <h3>📚 Guia do Swagger UI</h3>
+                        <p>Tutorial completo de como usar a documentação interativa</p>
+                    </a>
+                </div>
+            </div>
             
             <div class="links">
                 <a href="/client" class="link-card">
@@ -529,16 +715,6 @@ async def root():
                     <p>Baixar arquivo HTML para usar localmente no seu computador</p>
                 </a>
                 
-                <a href="/docs" class="link-card">
-                    <h3>📚 Documentação Swagger</h3>
-                    <p>Documentação interativa da API com exemplos</p>
-                </a>
-                
-                <a href="/redoc" class="link-card">
-                    <h3>📖 Documentação ReDoc</h3>
-                    <p>Documentação alternativa da API</p>
-                </a>
-                
                 <a href="/health" class="link-card">
                     <h3>❤️ Health Check</h3>
                     <p>Verificar status e saúde da API</p>
@@ -553,6 +729,7 @@ async def root():
             <div style="margin-top: 30px; text-align: center; color: #666;">
                 <p>Desenvolvido para extração e normalização de exames clínicos (Brasil)</p>
                 <p>Suporte: LOINC, UCUM, SNOMED CT, CID-10</p>
+                <p><strong>🚀 Use o Swagger UI em /docs para testar interativamente!</strong></p>
             </div>
         </div>
     </body>
