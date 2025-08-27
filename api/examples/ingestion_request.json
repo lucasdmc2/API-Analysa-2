@@ -1,0 +1,10 @@
+{
+  "document_type": "laboratory_report",
+  "patient_id": "123e4567-e89b-12d3-a456-426614174000",
+  "filename": "laudo_hemograma_2025_01_15.pdf",
+  "metadata": {
+    "lab_name": "Laboratório Central",
+    "collected_date": "2025-01-15",
+    "priority": "routine"
+  }
+}

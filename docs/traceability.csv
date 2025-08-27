@@ -1,2 +1,16 @@
 req_id,req_summary,test_id,test_summary,status
-R-001,User can sign up,T-001,Unit test for sign up,NOT_STARTED
+R-001,Processar PDF laboratorial < 30s,T-001,Load test PDF processing latency,NOT_STARTED
+R-002,Extração valor+unidade ≥98% top-50,T-002,Accuracy test on labeled dataset,NOT_STARTED
+R-003,Flags LOINC ≥97% vs referência,T-003,Flag calculation accuracy test,NOT_STARTED
+R-004,Determinismo byte-a-byte,T-004,Determinism property test,NOT_STARTED
+R-005,Auditoria completa por report_id,T-005,Audit trail completeness test,NOT_STARTED
+R-006,Sumário PT-BR + disclaimer,T-006,Summary generation validation,NOT_STARTED
+R-007,Cache por hash+versão,T-007,Cache hit/miss behavior test,NOT_STARTED
+R-008,JSON Schema 100% válidos,T-008,Schema validation test suite,NOT_STARTED
+R-009,LGPD compliance,T-009,Privacy controls validation,NOT_STARTED
+R-010,Faixas específicas por lab,T-010,Range selection logic test,NOT_STARTED
+F-001,POST /v1/ingestions,T-011,API contract test ingestion,NOT_STARTED
+F-002,GET /v1/reports/{id},T-012,API contract test report retrieval,NOT_STARTED
+F-003,OAuth2 authentication,T-013,Authentication flow test,NOT_STARTED
+F-004,Rate limiting 1000/hour,T-014,Rate limiting behavior test,NOT_STARTED
+F-005,Tenant data segregation,T-015,Multi-tenant isolation test,NOT_STARTED

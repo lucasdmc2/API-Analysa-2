@@ -1,6 +1,367 @@
 openapi: 3.1.0
 info:
-  title: Example API
-  version: 0.1.0
-paths: {}
-components: {}
+  title: API de Extração e Normalização de Exames Clínicos
+  description: |
+    API determinística para ingestão de laudos de exames (PDF/imagem), extração OCR, 
+    normalização LOINC/UCUM, cálculo de flags e geração de recomendações informativas 
+    para o contexto brasileiro.
+    
+    ## Principais Características
+    - **Determinismo**: Mesmo input → mesmo output (cache por hash)
+    - **Auditabilidade**: Trilha completa de processamento
+    - **Interoperabilidade**: LOINC, UCUM, SNOMED CT
+    - **Conformidade LGPD**: Dados em território brasileiro
+    
+    ## Autenticação
+    Esta API usa OAuth 2.0 com OIDC. Inclua o token Bearer no header Authorization.
+    
+  version: 1.0.0
+  contact:
+    name: API Support
+    email: api-support@clinical-extraction.com
+  license:
+    name: Proprietary
+    
+servers:
+  - url: https://api.clinical-extraction.com/v1
+    description: Production server
+  - url: http://localhost:8000/v1
+    description: Local development server
+
+security:
+  - OAuth2: [read, write, admin]
+
+paths:
+  /ingestions:
+    post:
+      summary: Iniciar ingestão de documento
+      description: Cria nova ingestão de documento médico (PDF/imagem)
+      operationId: createIngestion
+      tags: [Ingestão]
+      security:
+        - OAuth2: [write]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateIngestionRequest'
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                patient_id:
+                  type: string
+                  format: uuid
+      responses:
+        '201':
+          description: Ingestão criada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IngestionResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+  /ingestions/{ingestion_id}:
+    get:
+      summary: Consultar status da ingestão
+      operationId: getIngestion
+      tags: [Ingestão]
+      security:
+        - OAuth2: [read]
+      parameters:
+        - name: ingestion_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Status da ingestão
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IngestionStatus'
+
+  /reports/{report_id}:
+    get:
+      summary: Obter laudo estruturado
+      operationId: getReport
+      tags: [Laudos]
+      security:
+        - OAuth2: [read]
+      parameters:
+        - name: report_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Laudo estruturado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Report'
+
+  /patients/{patient_id}/observations:
+    get:
+      summary: Listar observações do paciente
+      operationId: getPatientObservations
+      tags: [Pacientes]
+      security:
+        - OAuth2: [read]
+      parameters:
+        - name: patient_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: loinc_code
+          in: query
+          schema:
+            type: string
+        - name: cursor
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: Lista de observações
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ObservationList'
+
+  /health:
+    get:
+      summary: Health check
+      operationId: healthCheck
+      tags: [Sistema]
+      security: []
+      responses:
+        '200':
+          description: Sistema saudável
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+
+components:
+  securitySchemes:
+    OAuth2:
+      type: oauth2
+      flows:
+        authorizationCode:
+          authorizationUrl: https://auth.clinical-extraction.com/oauth/authorize
+          tokenUrl: https://auth.clinical-extraction.com/oauth/token
+          scopes:
+            read: Ler dados
+            write: Criar/modificar dados
+            admin: Administração completa
+
+  schemas:
+    CreateIngestionRequest:
+      type: object
+      required: [document_type]
+      properties:
+        document_type:
+          type: string
+          enum: [laboratory_report, imaging_report]
+        patient_id:
+          type: string
+          format: uuid
+        filename:
+          type: string
+
+    IngestionResponse:
+      type: object
+      required: [ingestion_id, status, created_at]
+      properties:
+        ingestion_id:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum: [created, processing, completed, failed]
+        upload_url:
+          type: string
+          format: uri
+        created_at:
+          type: string
+          format: date-time
+
+    IngestionStatus:
+      type: object
+      properties:
+        ingestion_id:
+          type: string
+          format: uuid
+        document_id:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum: [uploaded, processing, completed, failed]
+        pipeline_version:
+          type: string
+        progress_percent:
+          type: integer
+          minimum: 0
+          maximum: 100
+        created_at:
+          type: string
+          format: date-time
+
+    Report:
+      type: object
+      properties:
+        report_id:
+          type: string
+          format: uuid
+        patient:
+          $ref: '#/components/schemas/Patient'
+        observations:
+          type: array
+          items:
+            $ref: '#/components/schemas/Observation'
+        summary_pt:
+          type: string
+        recommendations:
+          type: array
+          items:
+            $ref: '#/components/schemas/Recommendation'
+        created_at:
+          type: string
+          format: date-time
+
+    Observation:
+      type: object
+      properties:
+        observation_id:
+          type: string
+          format: uuid
+        loinc_code:
+          type: string
+        display:
+          type: string
+        value_numeric:
+          type: number
+        unit_ucum:
+          type: string
+        flag:
+          type: string
+          enum: [L, N, H, LL, HH]
+        reference_range:
+          $ref: '#/components/schemas/ReferenceRange'
+        collected_at:
+          type: string
+          format: date-time
+
+    Patient:
+      type: object
+      properties:
+        patient_id:
+          type: string
+          format: uuid
+        age_years:
+          type: integer
+        sex:
+          type: string
+          enum: [male, female, other, unknown]
+
+    ReferenceRange:
+      type: object
+      properties:
+        low:
+          type: number
+        high:
+          type: number
+        text:
+          type: string
+
+    Recommendation:
+      type: object
+      properties:
+        code:
+          type: string
+        text:
+          type: string
+        level:
+          type: string
+          enum: [info, attention, urgent]
+
+    ObservationList:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Observation'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+
+    Pagination:
+      type: object
+      properties:
+        next_cursor:
+          type: string
+        has_next:
+          type: boolean
+        limit:
+          type: integer
+
+    HealthResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [healthy, unhealthy]
+        timestamp:
+          type: string
+          format: date-time
+        dependencies:
+          type: object
+
+    Error:
+      type: object
+      properties:
+        type:
+          type: string
+          format: uri
+        title:
+          type: string
+        status:
+          type: integer
+        detail:
+          type: string
+
+  responses:
+    BadRequest:
+      description: Requisição inválida
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+tags:
+  - name: Ingestão
+    description: Upload e processamento de documentos
+  - name: Laudos
+    description: Consulta de laudos processados
+  - name: Pacientes
+    description: Dados de pacientes e observações
+  - name: Sistema
+    description: Saúde e monitoramento da API

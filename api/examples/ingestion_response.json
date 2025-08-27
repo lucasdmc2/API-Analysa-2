@@ -1,0 +1,7 @@
+{
+  "ingestion_id": "550e8400-e29b-41d4-a716-446655440000",
+  "status": "created",
+  "upload_url": "https://s3.amazonaws.com/clinical-bucket/upload-signed-url",
+  "expires_at": "2025-01-15T11:30:00Z",
+  "created_at": "2025-01-15T10:30:00Z"
+}

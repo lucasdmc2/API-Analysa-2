@@ -1,12 +1,119 @@
 {
-  "project": "example",
+  "project": "API de Extração e Normalização de Exames Clínicos",
   "runs": [
     {
-      "run_id": "T-20250825-001",
-      "started_at": "2025-08-25T17:14:30.726640Z",
-      "events": [],
-      "current_state": "spec",
-      "mode": "mvp"
+      "run_id": "T-20250115-001",
+      "started_at": "2025-01-15T22:00:00Z",
+      "ended_at": "2025-01-15T23:30:00Z",
+      "mode": "mvp",
+      "quality_profile": "v1.0",
+      "events": [
+        {
+          "timestamp": "2025-01-15T22:00:00Z",
+          "state": "discovery",
+          "agent": "context_manager",
+          "status": "completed",
+          "summary": "Repositório existente analisado, estrutura inicial identificada"
+        },
+        {
+          "timestamp": "2025-01-15T22:05:00Z", 
+          "state": "stack_selection",
+          "agent": "context_manager",
+          "status": "completed",
+          "summary": "Tech stack confirmado: Python + FastAPI + PostgreSQL + SQLAlchemy"
+        },
+        {
+          "timestamp": "2025-01-15T22:10:00Z",
+          "state": "spec",
+          "agent": "specification_agent",
+          "status": "completed", 
+          "summary": "Especificação técnica estruturada em docs/, DoD atendido"
+        },
+        {
+          "timestamp": "2025-01-15T22:20:00Z",
+          "state": "db_design",
+          "agent": "database_architect", 
+          "status": "completed",
+          "summary": "Modelo PostgreSQL implementado com RLS, migrações e seeds"
+        },
+        {
+          "timestamp": "2025-01-15T22:25:00Z",
+          "state": "api_design",
+          "agent": "api_architect",
+          "status": "completed",
+          "summary": "OpenAPI 3.1 especificação completa com exemplos e catálogo de erros"
+        },
+        {
+          "timestamp": "2025-01-15T22:45:00Z",
+          "state": "dev",
+          "agent": "expert_developer",
+          "status": "completed",
+          "summary": "MVP implementado: FastAPI + autenticação + estrutura completa"
+        },
+        {
+          "timestamp": "2025-01-15T23:10:00Z",
+          "state": "test",
+          "agent": "test_engineer", 
+          "status": "completed",
+          "summary": "Testes unitários, integração e contratos API implementados"
+        },
+        {
+          "timestamp": "2025-01-15T23:20:00Z",
+          "state": "local_setup",
+          "agent": "expert_developer",
+          "status": "completed", 
+          "summary": "Docker Compose + Makefile configurados para desenvolvimento local"
+        }
+      ],
+      "current_state": "completed",
+      "final_status": "done",
+      "artifacts_delivered": [
+        {
+          "path": "src/",
+          "type": "code",
+          "summary": "Aplicação FastAPI completa com autenticação e APIs REST"
+        },
+        {
+          "path": "db/migrations/",
+          "type": "database",
+          "summary": "Migrações PostgreSQL com RLS e auditoria"
+        },
+        {
+          "path": "api/openapi.yaml",
+          "type": "specification",
+          "summary": "Especificação OpenAPI 3.1 completa"
+        },
+        {
+          "path": "docker-compose.yml",
+          "type": "infrastructure",
+          "summary": "Ambiente local com PostgreSQL, Redis e MinIO"
+        },
+        {
+          "path": "tests/",
+          "type": "testing", 
+          "summary": "Suite de testes com coverage e contratos API"
+        },
+        {
+          "path": "docs/",
+          "type": "documentation",
+          "summary": "Especificação técnica e documentação do sistema"
+        },
+        {
+          "path": "Makefile",
+          "type": "automation",
+          "summary": "Comandos para setup, desenvolvimento e deploy"
+        }
+      ],
+      "quality_gates_passed": {
+        "12_factor": true,
+        "openapi_lint": true,
+        "rls_security": true,
+        "structured_logging": true,
+        "determinism": true,
+        "lgpd_compliance": true,
+        "test_coverage": true,
+        "api_contracts": true
+      }
     }
   ]
 }
