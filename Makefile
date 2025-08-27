@@ -3,7 +3,7 @@
 # Development setup
 setup:
 	@echo "Setting up development environment..."
-	python -m venv .venv
+	python3 -m venv .venv
 	. .venv/bin/activate && pip install --upgrade pip
 	. .venv/bin/activate && pip install -r requirements.txt
 	cp .env.example .env
