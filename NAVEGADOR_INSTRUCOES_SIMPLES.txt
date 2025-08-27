@@ -1,0 +1,36 @@
+🌐 ACESSO VIA NAVEGADOR - INSTRUÇÕES RÁPIDAS
+
+✅ PROBLEMA RESOLVIDO! Criei um cliente web completo!
+
+🎯 COMO ACESSAR:
+
+OPÇÃO 1 - PORT FORWARDING (Recomendado):
+1. No seu terminal local: ssh -L 3000:localhost:3000 -L 8000:localhost:8000 usuario@servidor
+2. Abra no seu navegador: http://localhost:3000/api_web_client.html
+
+OPÇÃO 2 - ACESSO DIRETO:
+1. Se você está no servidor: http://localhost:3000/api_web_client.html
+
+OPÇÃO 3 - DOWNLOAD:
+1. Baixe o arquivo: api_web_client.html  
+2. Abra no seu navegador local
+
+🔧 FUNCIONALIDADES:
+✅ Interface gráfica completa
+✅ Testar conexão com a API
+✅ Criar ingestões de documentos  
+✅ Consultar dados de pacientes
+✅ Configurar faixas de referência
+✅ 3 níveis de autenticação (admin/user/read)
+
+📊 DADOS DEMO PRONTOS:
+👤 Paciente: 123e4567-e89b-12d3-a456-426614174000
+🧪 Hemoglobina: 13.2 g/dL (Normal)
+🧪 Glicose: 105 mg/dL (Alto)
+
+🔐 TOKENS:
+- dev-admin (acesso completo)
+- dev-user (read/write)  
+- dev-read (somente leitura)
+
+🚀 STATUS: API 100% FUNCIONAL E ACESSÍVEL VIA NAVEGADOR!

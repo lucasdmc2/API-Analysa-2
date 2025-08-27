@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🩺 API de Extração e Normalização de Exames Clínicos - Cliente Web</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #2c5282 0%, #3182ce 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+        
+        .content {
+            padding: 30px;
+        }
+        
+        .config-section {
+            background: #f8f9ff;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            border-left: 5px solid #3182ce;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #2d3748;
+        }
+        
+        input, select, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #3182ce;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #38a169 0%, #48bb78 100%);
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: all 0.3s;
+            margin: 5px;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(56, 161, 105, 0.3);
+        }
+        
+        .btn-secondary {
+            background: linear-gradient(135deg, #3182ce 0%, #4299e1 100%);
+        }
+        
+        .btn-danger {
+            background: linear-gradient(135deg, #e53e3e 0%, #f56565 100%);
+        }
+        
+        .response-section {
+            margin-top: 30px;
+        }
+        
+        .response-box {
+            background: #1a202c;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            max-height: 400px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+        
+        .status {
+            padding: 10px 20px;
+            border-radius: 8px;
+            margin: 10px 0;
+            font-weight: bold;
+        }
+        
+        .status.success {
+            background: #c6f6d5;
+            color: #22543d;
+            border-left: 5px solid #38a169;
+        }
+        
+        .status.error {
+            background: #fed7d7;
+            color: #822727;
+            border-left: 5px solid #e53e3e;
+        }
+        
+        .status.info {
+            background: #bee3f8;
+            color: #2a69ac;
+            border-left: 5px solid #3182ce;
+        }
+        
+        .tabs {
+            display: flex;
+            background: #edf2f7;
+            border-radius: 10px 10px 0 0;
+            overflow: hidden;
+        }
+        
+        .tab {
+            flex: 1;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            background: #edf2f7;
+            border: none;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        
+        .tab.active {
+            background: white;
+            color: #3182ce;
+        }
+        
+        .tab-content {
+            display: none;
+            padding: 20px;
+            background: white;
+            border-radius: 0 0 10px 10px;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .card {
+            background: white;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 20px;
+            transition: all 0.3s;
+        }
+        
+        .card:hover {
+            border-color: #3182ce;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #3498db;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🩺 API de Exames Clínicos</h1>
+            <p>Cliente Web Interativo - Teste todos os endpoints da API</p>
+        </div>
+        
+        <div class="content">
+            <!-- Configuração da API -->
+            <div class="config-section">
+                <h3>⚙️ Configuração da API</h3>
+                <div class="form-group">
+                    <label for="apiUrl">URL da API:</label>
+                    <input type="text" id="apiUrl" value="http://localhost:8000" placeholder="http://localhost:8000">
+                </div>
+                <div class="form-group">
+                    <label for="authToken">Token de Autenticação:</label>
+                    <select id="authToken">
+                        <option value="">Sem autenticação</option>
+                        <option value="dev-admin">dev-admin (Admin completo)</option>
+                        <option value="dev-user" selected>dev-user (Read/Write)</option>
+                        <option value="dev-read">dev-read (Somente leitura)</option>
+                    </select>
+                </div>
+                <button class="btn btn-secondary" onclick="testConnection()">
+                    <span id="testBtn">🔍 Testar Conexão</span>
+                </button>
+            </div>
+            
+            <!-- Status da API -->
+            <div id="connectionStatus"></div>
+            
+            <!-- Abas dos Endpoints -->
+            <div class="tabs">
+                <button class="tab active" onclick="showTab('health')">🔍 Health Check</button>
+                <button class="tab" onclick="showTab('ingestion')">📁 Ingestão</button>
+                <button class="tab" onclick="showTab('patients')">👤 Pacientes</button>
+                <button class="tab" onclick="showTab('admin')">⚙️ Admin</button>
+            </div>
+            
+            <!-- Health Check Tab -->
+            <div id="health" class="tab-content active">
+                <h3>🔍 Health Check</h3>
+                <p>Verificar se a API está funcionando</p>
+                <button class="btn" onclick="checkHealth()">Verificar Saúde da API</button>
+                <div id="healthResponse" class="response-section"></div>
+            </div>
+            
+            <!-- Ingestão Tab -->
+            <div id="ingestion" class="tab-content">
+                <h3>📁 Ingestão de Documentos</h3>
+                <div class="grid">
+                    <div class="card">
+                        <h4>Criar Nova Ingestão</h4>
+                        <div class="form-group">
+                            <label for="docType">Tipo de Documento:</label>
+                            <select id="docType">
+                                <option value="laboratory_report">Laudo Laboratorial</option>
+                                <option value="imaging_report">Laudo de Imagem</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="patientId">ID do Paciente (opcional):</label>
+                            <input type="text" id="patientId" placeholder="123e4567-e89b-12d3-a456-426614174000">
+                        </div>
+                        <div class="form-group">
+                            <label for="filename">Nome do Arquivo:</label>
+                            <input type="text" id="filename" placeholder="laudo_hemograma.pdf">
+                        </div>
+                        <button class="btn" onclick="createIngestion()">Criar Ingestão</button>
+                    </div>
+                    
+                    <div class="card">
+                        <h4>Consultar Status</h4>
+                        <div class="form-group">
+                            <label for="ingestionId">ID da Ingestão:</label>
+                            <input type="text" id="ingestionId" placeholder="ID da ingestão">
+                        </div>
+                        <button class="btn btn-secondary" onclick="getIngestionStatus()">Consultar Status</button>
+                    </div>
+                </div>
+                <div id="ingestionResponse" class="response-section"></div>
+            </div>
+            
+            <!-- Pacientes Tab -->
+            <div id="patients" class="tab-content">
+                <h3>👤 Dados de Pacientes</h3>
+                <div class="card">
+                    <h4>Observações do Paciente</h4>
+                    <div class="form-group">
+                        <label for="patientIdObs">ID do Paciente:</label>
+                        <input type="text" id="patientIdObs" value="123e4567-e89b-12d3-a456-426614174000">
+                    </div>
+                    <div class="form-group">
+                        <label for="loincFilter">Filtro LOINC (opcional):</label>
+                        <input type="text" id="loincFilter" placeholder="718-7">
+                    </div>
+                    <button class="btn" onclick="getPatientObservations()">Buscar Observações</button>
+                </div>
+                <div id="patientsResponse" class="response-section"></div>
+            </div>
+            
+            <!-- Admin Tab -->
+            <div id="admin" class="tab-content">
+                <h3>⚙️ Administração</h3>
+                <div class="grid">
+                    <div class="card">
+                        <h4>Criar Faixa de Referência</h4>
+                        <div class="form-group">
+                            <label for="analyteKey">Chave do Analito:</label>
+                            <input type="text" id="analyteKey" placeholder="glucose_fasting">
+                        </div>
+                        <div class="form-group">
+                            <label for="unitUcum">Unidade UCUM:</label>
+                            <input type="text" id="unitUcum" placeholder="mg/dL">
+                        </div>
+                        <div class="form-group">
+                            <label for="refLow">Limite Inferior:</label>
+                            <input type="number" id="refLow" placeholder="70">
+                        </div>
+                        <div class="form-group">
+                            <label for="refHigh">Limite Superior:</label>
+                            <input type="number" id="refHigh" placeholder="99">
+                        </div>
+                        <button class="btn" onclick="createRangeset()">Criar Faixa</button>
+                    </div>
+                    
+                    <div class="card">
+                        <h4>Listar Faixas</h4>
+                        <button class="btn btn-secondary" onclick="listRangesets()">Listar Todas as Faixas</button>
+                    </div>
+                </div>
+                <div id="adminResponse" class="response-section"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configuração global
+        let currentApiUrl = 'http://localhost:8000';
+        let currentToken = 'dev-user';
+        
+        // Função para mostrar abas
+        function showTab(tabName) {
+            // Esconder todas as abas
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Mostrar aba selecionada
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+        }
+        
+        // Função para fazer requisições à API
+        async function makeApiRequest(endpoint, method = 'GET', body = null, requiresAuth = true) {
+            const url = currentApiUrl + endpoint;
+            const headers = {
+                'Content-Type': 'application/json',
+            };
+            
+            if (requiresAuth && currentToken) {
+                headers['Authorization'] = `Bearer ${currentToken}`;
+            }
+            
+            const options = {
+                method,
+                headers,
+                mode: 'cors'
+            };
+            
+            if (body) {
+                options.body = JSON.stringify(body);
+            }
+            
+            try {
+                const response = await fetch(url, options);
+                const data = await response.json();
+                
+                return {
+                    success: response.ok,
+                    status: response.status,
+                    data: data
+                };
+            } catch (error) {
+                return {
+                    success: false,
+                    status: 0,
+                    error: error.message
+                };
+            }
+        }
+        
+        // Função para mostrar resposta
+        function showResponse(containerId, response) {
+            const container = document.getElementById(containerId);
+            
+            let statusClass = response.success ? 'success' : 'error';
+            let statusText = response.success ? '✅ Sucesso' : '❌ Erro';
+            
+            if (response.status === 0) {
+                statusText = '🔌 Erro de Conexão - Verifique se a API está rodando';
+                statusClass = 'error';
+            }
+            
+            container.innerHTML = `
+                <div class="status ${statusClass}">
+                    ${statusText} (Status: ${response.status || 'Conexão falhou'})
+                </div>
+                <div class="response-box">
+${response.error ? 'ERRO: ' + response.error : JSON.stringify(response.data, null, 2)}
+                </div>
+            `;
+        }
+        
+        // Atualizar configuração
+        function updateConfig() {
+            currentApiUrl = document.getElementById('apiUrl').value;
+            currentToken = document.getElementById('authToken').value;
+        }
+        
+        // Testar conexão
+        async function testConnection() {
+            updateConfig();
+            const btn = document.getElementById('testBtn');
+            btn.innerHTML = '<span class="loading"></span> Testando...';
+            
+            const response = await makeApiRequest('/health', 'GET', null, false);
+            
+            const statusDiv = document.getElementById('connectionStatus');
+            if (response.success) {
+                statusDiv.innerHTML = `
+                    <div class="status success">
+                        ✅ Conexão estabelecida com sucesso!<br>
+                        API: ${currentApiUrl}<br>
+                        Versão: ${response.data.version || 'N/A'}<br>
+                        Status: ${response.data.status || 'N/A'}
+                    </div>
+                `;
+            } else {
+                statusDiv.innerHTML = `
+                    <div class="status error">
+                        ❌ Falha na conexão com a API<br>
+                        URL: ${currentApiUrl}<br>
+                        Erro: ${response.error || 'Desconhecido'}<br>
+                        <strong>Soluções:</strong><br>
+                        • Verifique se a API está rodando<br>
+                        • Use: curl http://localhost:8000/health<br>
+                        • Configure port forwarding se necessário
+                    </div>
+                `;
+            }
+            
+            btn.innerHTML = '🔍 Testar Conexão';
+        }
+        
+        // Health Check
+        async function checkHealth() {
+            updateConfig();
+            const response = await makeApiRequest('/health', 'GET', null, false);
+            showResponse('healthResponse', response);
+        }
+        
+        // Criar Ingestão
+        async function createIngestion() {
+            updateConfig();
+            
+            const body = {
+                document_type: document.getElementById('docType').value,
+                filename: document.getElementById('filename').value || undefined
+            };
+            
+            const patientId = document.getElementById('patientId').value;
+            if (patientId) {
+                body.patient_id = patientId;
+            }
+            
+            const response = await makeApiRequest('/v1/ingestions', 'POST', body);
+            showResponse('ingestionResponse', response);
+            
+            // Se sucesso, preencher campo de consulta
+            if (response.success && response.data.ingestion_id) {
+                document.getElementById('ingestionId').value = response.data.ingestion_id;
+            }
+        }
+        
+        // Consultar Status da Ingestão
+        async function getIngestionStatus() {
+            updateConfig();
+            const ingestionId = document.getElementById('ingestionId').value;
+            
+            if (!ingestionId) {
+                showResponse('ingestionResponse', {
+                    success: false,
+                    status: 400,
+                    data: { detail: 'ID da ingestão é obrigatório' }
+                });
+                return;
+            }
+            
+            const response = await makeApiRequest(`/v1/ingestions/${ingestionId}`);
+            showResponse('ingestionResponse', response);
+        }
+        
+        // Observações do Paciente
+        async function getPatientObservations() {
+            updateConfig();
+            const patientId = document.getElementById('patientIdObs').value;
+            const loincFilter = document.getElementById('loincFilter').value;
+            
+            let endpoint = `/v1/patients/${patientId}/observations`;
+            if (loincFilter) {
+                endpoint += `?loinc_code=${loincFilter}`;
+            }
+            
+            const response = await makeApiRequest(endpoint);
+            showResponse('patientsResponse', response);
+        }
+        
+        // Criar Faixa de Referência
+        async function createRangeset() {
+            updateConfig();
+            
+            const body = {
+                analyte_key: document.getElementById('analyteKey').value,
+                unit_ucum: document.getElementById('unitUcum').value,
+                ref_low: parseFloat(document.getElementById('refLow').value) || undefined,
+                ref_high: parseFloat(document.getElementById('refHigh').value) || undefined
+            };
+            
+            const response = await makeApiRequest('/v1/admin/rangesets', 'POST', body);
+            showResponse('adminResponse', response);
+        }
+        
+        // Listar Faixas de Referência
+        async function listRangesets() {
+            updateConfig();
+            const response = await makeApiRequest('/v1/admin/rangesets');
+            showResponse('adminResponse', response);
+        }
+        
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', function() {
+            // Preencher valores padrão
+            document.getElementById('patientId').value = '123e4567-e89b-12d3-a456-426614174000';
+            document.getElementById('filename').value = 'laudo_teste.pdf';
+            document.getElementById('analyteKey').value = 'glucose_test';
+            document.getElementById('unitUcum').value = 'mg/dL';
+            document.getElementById('refLow').value = '70';
+            document.getElementById('refHigh').value = '99';
+            
+            // Teste inicial
+            setTimeout(testConnection, 1000);
+        });
+    </script>
+</body>
+</html>
