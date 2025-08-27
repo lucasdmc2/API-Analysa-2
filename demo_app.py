@@ -5,8 +5,9 @@ Simplified version that works without database dependencies
 
 from fastapi import FastAPI, HTTPException, Depends, status
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse, HTMLResponse
+from fastapi.responses import JSONResponse, HTMLResponse, FileResponse
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 from typing import Optional, List, Dict, Any
 from datetime import datetime
@@ -436,6 +437,87 @@ async def list_rangesets(
             "limit": limit,
         }
     }
+
+# ============================================================================
+# STATIC FILES AND WEB CLIENT
+# ============================================================================
+
+@app.get("/client", response_class=HTMLResponse)
+async def web_client():
+    """Serve the web client interface"""
+    try:
+        with open("/workspace/api_web_client.html", "r", encoding="utf-8") as f:
+            return HTMLResponse(content=f.read())
+    except FileNotFoundError:
+        return HTMLResponse(
+            content="""
+            <html><body>
+            <h1>Cliente Web não encontrado</h1>
+            <p>O arquivo api_web_client.html não foi encontrado.</p>
+            <p><a href="/docs">Acesse a documentação da API</a></p>
+            </body></html>
+            """,
+            status_code=404
+        )
+
+@app.get("/")
+async def root():
+    """Root endpoint with links to all interfaces"""
+    return HTMLResponse(content=f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>API de Exames Clínicos - DEMO</title>
+        <style>
+            body {{ font-family: Arial, sans-serif; margin: 50px; background: #f5f5f5; }}
+            .container {{ max-width: 800px; margin: 0 auto; background: white; padding: 40px; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }}
+            h1 {{ color: #2c5282; text-align: center; }}
+            .links {{ display: grid; gap: 20px; margin-top: 30px; }}
+            .link-card {{ background: #e2e8f0; padding: 20px; border-radius: 8px; text-decoration: none; color: #2d3748; border-left: 5px solid #3182ce; }}
+            .link-card:hover {{ background: #cbd5e0; transform: translateY(-2px); transition: all 0.2s; }}
+            .status {{ background: #c6f6d5; color: #22543d; padding: 10px; border-radius: 5px; margin: 20px 0; text-align: center; }}
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <h1>🩺 API de Extração e Normalização de Exames Clínicos</h1>
+            <div class="status">✅ API Online - Versão Demo</div>
+            
+            <div class="links">
+                <a href="/client" class="link-card">
+                    <h3>🌐 Cliente Web Interativo</h3>
+                    <p>Interface gráfica completa para testar todos os endpoints da API</p>
+                </a>
+                
+                <a href="/docs" class="link-card">
+                    <h3>📚 Documentação Swagger</h3>
+                    <p>Documentação interativa da API com exemplos</p>
+                </a>
+                
+                <a href="/redoc" class="link-card">
+                    <h3>📖 Documentação ReDoc</h3>
+                    <p>Documentação alternativa da API</p>
+                </a>
+                
+                <a href="/health" class="link-card">
+                    <h3>❤️ Health Check</h3>
+                    <p>Verificar status e saúde da API</p>
+                </a>
+                
+                <a href="/api-docs" class="link-card">
+                    <h3>📄 Documentação HTML</h3>
+                    <p>Documentação estática em HTML</p>
+                </a>
+            </div>
+            
+            <div style="margin-top: 30px; text-align: center; color: #666;">
+                <p>Desenvolvido para extração e normalização de exames clínicos (Brasil)</p>
+                <p>Suporte: LOINC, UCUM, SNOMED CT, CID-10</p>
+            </div>
+        </div>
+    </body>
+    </html>
+    """)
 
 if __name__ == "__main__":
     import uvicorn
