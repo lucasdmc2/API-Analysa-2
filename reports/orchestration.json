@@ -1,0 +1,12 @@
+{
+  "project": "example",
+  "runs": [
+    {
+      "run_id": "T-20250825-001",
+      "started_at": "2025-08-25T17:14:30.726640Z",
+      "events": [],
+      "current_state": "spec",
+      "mode": "mvp"
+    }
+  ]
+}
